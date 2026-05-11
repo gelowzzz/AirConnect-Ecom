@@ -21,11 +21,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{background:var(--black);color:var(--white);font-family:"Barlow",sans-serif;font-weight:300;overflow-x:hidden;cursor:none;}
-
-/* ── CURSOR ── */
-#cur{position:fixed;width:9px;height:9px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .15s,height .15s;}
-#ring{position:fixed;width:36px;height:36px;border:1px solid rgba(201,168,76,.45);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);}
+body{background:var(--black);color:var(--white);font-family:"Barlow",sans-serif;font-weight:300;overflow-x:hidden;}
 
 /* ── NAV ── */
 nav{position:fixed;top:0;left:0;right:0;z-index:1001;display:flex;align-items:center;justify-content:space-between;padding:22px 60px;background:linear-gradient(to bottom,rgba(9,9,9,.96) 0%,transparent 100%);}
@@ -2311,6 +2307,392 @@ footer{background:var(--black);border-top:1px solid rgba(201,168,76,.1);padding:
   .cd-block { min-width: 36px; padding: 5px 7px; }
 }
 
+/* ══════════════════════════════════════════════
+   NEW PLAN CARDS — PRICING REDESIGN
+   ══════════════════════════════════════════════ */
+
+/* Billing Toggle */
+.pricing-toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 52px;
+}
+.pt-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--white-d);
+  transition: color .25s, opacity .25s;
+}
+.pt-label.active { color: var(--gold); }
+.pt-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  cursor: pointer;
+}
+.pt-switch input { opacity: 0; width: 0; height: 0; }
+.pt-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(201,168,76,.2);
+  border: 1px solid rgba(201,168,76,.4);
+  border-radius: 999px;
+  transition: background .3s;
+}
+.pt-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; top: 50%;
+  transform: translateY(-50%);
+  background: var(--gold-dim);
+  border-radius: 50%;
+  transition: transform .3s, background .3s;
+}
+.pt-switch input:checked + .pt-slider { background: rgba(201,168,76,.3); }
+.pt-switch input:checked + .pt-slider::before {
+  transform: translate(22px, -50%);
+  background: var(--gold);
+}
+.pt-save-tag {
+  display: inline-block;
+  background: rgba(201,168,76,.18);
+  border: 1px solid rgba(201,168,76,.4);
+  color: var(--gold);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Plan cards row */
+.plan-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 44px;
+  text-align: left;
+}
+.plan-card {
+  background: linear-gradient(160deg, #161208, #0a0a0a);
+  border: 1px solid rgba(201,168,76,.28);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow .35s, transform .25s;
+}
+.plan-card:hover {
+  box-shadow: 0 0 48px rgba(201,168,76,.12);
+  transform: translateY(-4px);
+}
+.plan-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(201,168,76,.5) 50%, transparent 100%);
+}
+
+/* Popular card */
+.plan-card-popular {
+  border-color: var(--gold);
+  background: linear-gradient(160deg, #1c1508, #0b0b0b);
+  box-shadow: 0 0 56px rgba(201,168,76,.16), 0 0 0 1px rgba(201,168,76,.3);
+  transform: translateY(-8px);
+}
+.plan-card-popular::before {
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
+}
+.plan-card-popular:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 0 72px rgba(201,168,76,.22), 0 0 0 1px rgba(201,168,76,.4);
+}
+
+/* Popular badge floating above card */
+.plan-popular-badge {
+  position: absolute;
+  top: -1px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--black);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  padding: 5px 20px;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+/* Teams card */
+.plan-card-teams {
+  border-color: rgba(201,168,76,.4);
+  background: linear-gradient(160deg, #0d0d10, #0a0a0a);
+}
+
+/* Badge strip at top of each card */
+.plan-badge-strip {
+  background: rgba(201,168,76,.1);
+  border-bottom: 1px solid rgba(201,168,76,.18);
+  padding: 9px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plan-badge-gold {
+  background: linear-gradient(90deg, #a8842a 0%, var(--gold) 50%, #a8842a 100%);
+  border-bottom-color: transparent;
+}
+.plan-badge-teams {
+  background: rgba(201,168,76,.08);
+  border-bottom: 1px solid rgba(201,168,76,.15);
+}
+.plan-badge-text {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+.plan-badge-text-dark { color: var(--black); }
+
+/* Card body */
+.plan-card-body {
+  padding: 32px 32px 36px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Plan name */
+.plan-name {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.plan-name-gold { color: var(--gold-lt); }
+
+/* Plan description */
+.plan-desc {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--white-d);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+/* Price wrap */
+.plan-price-wrap { margin-bottom: 28px; }
+.plan-price {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.plan-currency {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--white-d);
+  padding-bottom: 8px;
+}
+.plan-currency-gold { color: var(--gold); }
+.plan-amount {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 68px;
+  font-weight: 300;
+  color: var(--white);
+  transition: all .3s ease;
+}
+.plan-amount-gold { color: var(--gold-lt); }
+.plan-period {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--white-d);
+  margin-bottom: 4px;
+  transition: all .3s ease;
+}
+.plan-period-note {
+  font-size: 11px;
+  color: rgba(244,241,235,.38);
+  letter-spacing: .04em;
+  transition: all .3s ease;
+}
+
+/* Custom quote (Teams) price area */
+.plan-price-quote {
+  padding: 20px 0;
+  border-top: 1px solid rgba(201,168,76,.1);
+  border-bottom: 1px solid rgba(201,168,76,.1);
+  margin-bottom: 28px;
+}
+.plan-quote-label {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.plan-quote-sub {
+  font-size: 12px;
+  color: var(--white-d);
+  letter-spacing: .05em;
+}
+
+/* CTA Buttons */
+.plan-cta-btn {
+  display: block;
+  width: 100%;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  padding: 16px 24px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 32px;
+  transition: transform .2s, box-shadow .3s, letter-spacing .3s;
+}
+.plan-cta-btn:hover { transform: translateY(-2px); letter-spacing: .34em; }
+.plan-cta-btn:active { transform: translateY(0); }
+
+.plan-cta-base {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,.5);
+}
+.plan-cta-base:hover {
+  background: rgba(201,168,76,.08);
+  box-shadow: 0 0 24px rgba(201,168,76,.12);
+}
+
+.plan-cta-pro {
+  background: var(--gold);
+  color: var(--black);
+  box-shadow: 0 4px 28px rgba(201,168,76,.3);
+}
+.plan-cta-pro:hover {
+  background: var(--gold-lt);
+  box-shadow: 0 8px 40px rgba(201,168,76,.45);
+}
+
+.plan-cta-teams {
+  background: transparent;
+  color: var(--gold-lt);
+  border: 1px solid rgba(201,168,76,.4);
+}
+.plan-cta-teams:hover {
+  background: rgba(201,168,76,.1);
+  box-shadow: 0 0 24px rgba(201,168,76,.1);
+}
+
+/* Feature icon list */
+.plan-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.pf-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--white-d);
+  line-height: 1.4;
+}
+.pf-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: var(--gold-dim);
+  min-width: 20px;
+  text-align: center;
+  margin-top: 1px;
+}
+.pf-icon-gold { color: var(--gold); }
+
+/* Divider */
+.plan-divider {
+  height: 1px;
+  background: rgba(201,168,76,.12);
+  margin-bottom: 20px;
+}
+.plan-divider-gold { background: rgba(201,168,76,.3); }
+
+/* Includes list */
+.plan-includes-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 9px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 12px;
+}
+.plan-includes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+.pi-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--white-d);
+  line-height: 1.4;
+}
+.pi-check {
+  color: var(--gold-dim);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+.pi-check-gold { color: var(--gold); }
+
+/* Responsive: plan cards */
+@media(max-width: 1024px) {
+  .plan-cards-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .plan-card-popular { transform: none; }
+  .plan-card-popular:hover { transform: translateY(-4px); }
+}
+@media(max-width: 680px) {
+  .plan-cards-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .plan-card-popular { transform: none; }
+  .plan-card-body { padding: 24px 22px 28px; }
+  .plan-amount { font-size: 54px; }
+  .plan-quote-label { font-size: 28px; }
+}
+
 
 /* ══════════════════════════════════════════════
    STICKY PRE-LAUNCH TOP BAR
@@ -3115,9 +3497,6 @@ nav {
   </div>
 </div>
 
-<div id="cur"></div>
-<div id="ring"></div>
-
 <!-- NAV -->
 <nav>
   <div class="logo">Air<span>Connect</span></div>
@@ -3476,354 +3855,163 @@ nav {
 
     <!-- Section eye + headline -->
     <div class="sec-eye rev" style="justify-content:center;"><span style="display:none;"></span>Choose Your Plan</div>
-    <h2 class="sec-h rev d1" style="margin-bottom:12px;">One Card. Two Ways<br>to <em>Dominate.</em></h2>
-    <p class="sec-p rev d2" style="max-width:480px;margin:0 auto 48px;text-align:center;">
-      Start with the card that lives on their phone. Upgrade anytime with Pro to close deals while you sleep.
+    <h2 class="sec-h rev d1" style="margin-bottom:12px;">One Card. <em>Three Ways</em><br>to Dominate.</h2>
+    <p class="sec-p rev d2" style="max-width:520px;margin:0 auto 40px;text-align:center;">
+      Start with the physical card. Power it with AI. Scale your entire team.
     </p>
 
-    <!-- TWO OFFER CARDS SIDE BY SIDE -->
-    <div class="offer-cards-row">
+    <!-- Billing Toggle -->
+    <div class="pricing-toggle-wrap rev d2">
+      <span class="pt-label active" id="pt-monthly-label">Monthly</span>
+      <label class="pt-switch" aria-label="Toggle billing period">
+        <input type="checkbox" id="pricingToggle" onchange="updatePricingToggle()">
+        <span class="pt-slider"></span>
+      </label>
+      <span class="pt-label" id="pt-yearly-label">Yearly <span class="pt-save-tag">Save 17%</span></span>
+    </div>
 
-    <!-- CARD 1: AirConnect Card -->
-    <div class="offer-card offer-card-base rev d2">
+    <!-- THREE PLAN CARDS -->
+    <div class="plan-cards-row">
 
-      <div class="offer-badge-strip">
-        <div class="obs-dot"></div>
-        <div class="obs-text">AirConnect Card</div>
-        <div class="obs-dot"></div>
-        <div class="obs-text">One-Time Payment</div>
-        <div class="obs-dot"></div>
-      </div>
-
-      <div class="offer-body">
-
-        <div class="offer-tier">AirConnect Card</div>
-        <div class="offer-name">The Premium NFC Card</div>
-
-        <div class="offer-divider"></div>
-
-        <!-- Value Stack -->
-        <div class="value-stack">
-          <div class="vs-title">What You Get &mdash; Total Value</div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Premium Matte Black + Gold NFC Card
-                <span>Crafted with geometric gold detail. Built to last a lifetime.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;2,000</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Personalized Home Screen App Icon
-                <span>Your name &amp; brand installed on every phone you tap. Permanently.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;1,500</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Unlimited Digital Profile Links
-                <span>LinkedIn, Calendly, GCash QR, website, socials &mdash; all in one profile.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;500</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Lifetime Free Profile Updates
-                <span>New job? New number? Update anytime &mdash; card stays the same forever.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;600</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Full Tap &amp; Open Analytics Dashboard
-                <span>See who tapped, when, and which links they clicked. Know your ROI.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;400</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                QR Code Fallback (Built-In)
-                <span>Works even when NFC isn&rsquo;t available. No one left behind.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;200</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Priority NFC Card Replacement
-                <span>First replacement absolutely free. We&rsquo;ve got your back if anything happens.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;350</div>
-          </div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">✦</div>
-              <div class="vs-item-name">
-                Priority Support &amp; White-Glove Onboarding
-                <span>Dedicated setup assistance. We make sure your card works perfectly from day one.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;450</div>
-          </div>
-
-          <div class="vs-total-row">
-            <div class="vs-total-label">Total Value</div>
-            <div class="vs-total-val"><del>&#8369;6,000</del> &nbsp;&#8369;3,000</div>
-          </div>
+      <!-- CARD 1: AirConnect Card -->
+      <div class="plan-card rev d2">
+        <div class="plan-badge-strip">
+          <span class="plan-badge-text">ONE-TIME PAYMENT</span>
         </div>
+        <div class="plan-card-body">
 
-        <!-- Your Price -->
-        <div class="offer-price-reveal">
-          <div class="opr-label">Your Price Today</div>
-          <div class="offer-price-block">
-            <div class="offer-now"><sup>&#8369;</sup>3,000</div>
+          <div class="plan-name">AirConnect Card</div>
+          <div class="plan-desc">The Premium NFC Card that lives on their phone — forever.</div>
+
+          <div class="plan-price-wrap">
+            <div class="plan-price">
+              <sup class="plan-currency">&#8369;</sup>
+              <span class="plan-amount">3,000</span>
+            </div>
+            <div class="plan-period">one-time payment</div>
+            <div class="plan-period-note">No subscriptions. No monthly fees. Ever.</div>
           </div>
-          <div class="offer-period">One-time payment &nbsp;&bull;&nbsp; <em>No subscriptions. No monthly fees. Ever.</em></div>
-        </div>
 
-        <!-- Guarantee -->
-        <div class="offer-guarantee">
-          <div class="og-icon">🛡</div>
-          <div class="og-text">
-            <strong>Zero-Risk Guarantee.</strong> If your AirConnect card doesn&rsquo;t work on delivery,
-            we replace it. Free. No questions asked.
-          </div>
-        </div>
-
-        <!-- CTA Button -->
-        <a href="#" class="offer-btn">
-          <span class="offer-btn-inner">
+          <a href="#" class="plan-cta-btn plan-cta-base">
             Get Your Card Now
-          </span>
-          <span class="offer-btn-sub">One-Time Payment &bull; Free Nationwide Shipping</span>
-        </a>
+          </a>
 
-      </div>
-    </div>
-
-    <!-- CARD 2: AirConnect Pro -->
-    <div class="offer-card offer-card-pro rev d3">
-
-      <div class="offer-badge-strip offer-badge-pro">
-        <div class="obs-dot"></div>
-        <div class="obs-text">AirConnect Pro</div>
-        <div class="obs-dot"></div>
-        <div class="obs-text">Most Popular Upgrade</div>
-        <div class="obs-dot"></div>
-      </div>
-
-      <div class="offer-body">
-
-        <div class="offer-tier" style="color:var(--gold);">AirConnect Pro</div>
-        <div class="offer-name">Your 24/7 AI Sales Machine</div>
-
-        <div class="offer-divider"></div>
-
-        <!-- Value Stack -->
-        <div class="value-stack">
-          <div class="vs-title">What You Get &mdash; Total Value</div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">🤖</div>
-              <div class="vs-item-name">
-                24/7 AI Sales Concierge
-                <span>Answers inquiries, qualifies leads &amp; closes deals while you sleep. Never miss a message.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;12,000</div>
+          <div class="plan-features">
+            <div class="pf-item"><span class="pf-icon">✦</span><span>Premium Matte Black + Gold NFC Card</span></div>
+            <div class="pf-item"><span class="pf-icon">✦</span><span>Personalized Home Screen App Icon</span></div>
+            <div class="pf-item"><span class="pf-icon">✦</span><span>Unlimited Digital Profile Links</span></div>
+            <div class="pf-item"><span class="pf-icon">✦</span><span>Full Tap &amp; Analytics Dashboard</span></div>
+            <div class="pf-item"><span class="pf-icon">✦</span><span>QR Code Fallback Built-In</span></div>
           </div>
 
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">📊</div>
-              <div class="vs-item-name">
-                Smart AI Lead Scoring
-                <span>Filters serious buyers from browsers based on chat behavior &amp; interest signals.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;10,000</div>
+          <div class="plan-divider"></div>
+
+          <div class="plan-includes-label">What&rsquo;s Included</div>
+          <div class="plan-includes">
+            <div class="pi-item"><span class="pi-check">✓</span> Lifetime Free Profile Updates</div>
+            <div class="pi-item"><span class="pi-check">✓</span> Priority NFC Card Replacement</div>
+            <div class="pi-item"><span class="pi-check">✓</span> White-Glove Onboarding Support</div>
+            <div class="pi-item"><span class="pi-check">✓</span> Free Nationwide Shipping</div>
+            <div class="pi-item"><span class="pi-check">✓</span> Zero-Risk Guarantee</div>
           </div>
 
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">🗂️</div>
-              <div class="vs-item-name">
-                Built-In CRM System
-                <span>Auto-collects all lead data from every AirConnect interaction. Your pipeline, organized.</span>
-              </div>
-            </div>
-            <div class="vs-item-val">&#8369;8,000</div>
-          </div>
-
-          <div class="vs-total-row">
-            <div class="vs-total-label">Total Monthly Value</div>
-            <div class="vs-total-val"><del>&#8369;30,000</del> &nbsp;&#8369;1,500</div>
-          </div>
         </div>
-
-        <!-- Your Price -->
-        <div class="offer-price-reveal">
-          <div class="opr-label">Your Price Today</div>
-          <div class="offer-price-block">
-            <div class="offer-now"><sup>&#8369;</sup>1,500</div>
-            <div class="offer-save-tag">/ month</div>
-          </div>
-          <div class="offer-period"><em>Cancel anytime.</em> &nbsp;&bull;&nbsp; No contracts. No setup fees.</div>
-        </div>
-
-        <!-- ROI Note -->
-        <div class="offer-guarantee" style="background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.3);">
-          <div class="og-icon">⚡</div>
-          <div class="og-text">
-            <strong>If AI closes 1 extra deal per month</strong>, AirConnect Pro pays for itself many times over &mdash; and works every day after that for free.
-          </div>
-        </div>
-
-        <!-- CTA Button -->
-        <a href="upsell.html" class="offer-btn offer-btn-pro">
-          <span class="offer-btn-inner">
-            Upgrade to Pro &mdash; &#8369;1,500/mo
-          </span>
-          <span class="offer-btn-sub">Cancel anytime &bull; 30-day money-back guarantee</span>
-        </a>
-
-      </div>
-    </div>
-
-
-    <!-- CARD 3: AirConnect Teams -->
-    <div class="offer-card offer-card-teams rev d4">
-
-      <div class="offer-badge-strip offer-badge-teams">
-        <div class="obs-dot"></div>
-        <div class="obs-text">AirConnect Teams</div>
-        <div class="obs-dot"></div>
-        <div class="obs-text">Group Discount</div>
-        <div class="obs-dot"></div>
       </div>
 
-      <div class="offer-body">
+      <!-- CARD 2: AirConnect Pro (Popular) -->
+      <div class="plan-card plan-card-popular rev d3">
+        <div class="plan-popular-badge">MOST POPULAR</div>
+        <div class="plan-badge-strip plan-badge-gold">
+          <span class="plan-badge-text plan-badge-text-dark">AIRCONNECT PRO</span>
+        </div>
+        <div class="plan-card-body">
 
-        <div class="offer-tier" style="color:var(--gold);">AirConnect Teams</div>
-        <div class="offer-name">Tailored Cards. Unbeatable Group Price.</div>
+          <div class="plan-name plan-name-gold">AirConnect Pro</div>
+          <div class="plan-desc">Your 24/7 AI Sales Machine that qualifies leads and closes deals while you sleep.</div>
 
-        <div class="offer-divider"></div>
-
-        <!-- Value Stack -->
-        <div class="value-stack">
-          <div class="vs-title">What Your Team Gets</div>
-
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">🎨</div>
-              <div class="vs-item-name">
-                Custom Tailored Team Designs
-                <span>Cohesive branding across every card. Your team looks premium, polished, and professional.</span>
-              </div>
+          <div class="plan-price-wrap">
+            <div class="plan-price">
+              <sup class="plan-currency plan-currency-gold">&#8369;</sup>
+              <span class="plan-amount plan-amount-gold" id="pro-amount">1,500</span>
             </div>
+            <div class="plan-period" id="pro-period">/month</div>
+            <div class="plan-period-note" id="pro-note">Cancel anytime &middot; No contracts &middot; No setup fees</div>
           </div>
 
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">⚡</div>
-              <div class="vs-item-name">
-                Bulk Order Priority Fulfillment
-                <span>Your team's order moves to the front. Faster turnaround, guaranteed.</span>
-              </div>
-            </div>
+          <a href="upsell.html" class="plan-cta-btn plan-cta-pro">
+            Upgrade to Pro
+          </a>
+
+          <div class="plan-features">
+            <div class="pf-item"><span class="pf-icon pf-icon-gold">🤖</span><span>24/7 AI Sales Concierge</span></div>
+            <div class="pf-item"><span class="pf-icon pf-icon-gold">📊</span><span>Smart AI Lead Scoring</span></div>
+            <div class="pf-item"><span class="pf-icon pf-icon-gold">🗂️</span><span>Built-In CRM System</span></div>
+            <div class="pf-item"><span class="pf-icon pf-icon-gold">⚡</span><span>Instant Lead Notifications</span></div>
+            <div class="pf-item"><span class="pf-icon pf-icon-gold">🔗</span><span>Multiple Profile Versions</span></div>
           </div>
 
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">🔗</div>
-              <div class="vs-item-name">
-                Individual Digital Profiles for Each Member
-                <span>Every team member gets their own live profile — updated anytime, no reprinting needed.</span>
-              </div>
-            </div>
-          </div>
+          <div class="plan-divider plan-divider-gold"></div>
 
-          <div class="vs-item">
-            <div class="vs-item-left">
-              <div class="vs-check">📦</div>
-              <div class="vs-item-name">
-                Dedicated Account Manager
-                <span>White-glove setup from start to finish. We handle everything so your team hits the ground running.</span>
-              </div>
-            </div>
+          <div class="plan-includes-label">Everything in Card, plus</div>
+          <div class="plan-includes">
+            <div class="pi-item"><span class="pi-check pi-check-gold">✓</span> 24/7 AI Inquiry Handling</div>
+            <div class="pi-item"><span class="pi-check pi-check-gold">✓</span> Automated Lead Qualification</div>
+            <div class="pi-item"><span class="pi-check pi-check-gold">✓</span> Auto-collected Pipeline CRM</div>
+            <div class="pi-item"><span class="pi-check pi-check-gold">✓</span> Unlimited Profile Versions</div>
+            <div class="pi-item"><span class="pi-check pi-check-gold">✓</span> 30-Day Money-Back Guarantee</div>
           </div>
 
         </div>
-
-        <!-- Your Price -->
-        <div class="offer-price-reveal">
-          <div class="opr-label">Your Price Today <span style="font-size:10px;color:var(--gold-dim);font-weight:400;">(50% group discount)</span></div>
-          <div class="offer-price-block" style="align-items:flex-end;gap:12px;">
-            <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;">
-              <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:500;color:var(--white-d);letter-spacing:.05em;text-decoration:line-through;opacity:.7;">&#8369;3,000</span>
-              <div class="offer-now" style="line-height:1;"><sup>&#8369;</sup>1,500</div>
-            </div>
-            <div class="offer-save-tag" style="padding-bottom:6px;">per card</div>
-          </div>
-          <div class="offer-period"><em>50% off regular price.</em> &nbsp;&bull;&nbsp; Min. 50 cards to qualify.</div>
-          <div class="offer-save-badge-teams">YOUR TEAM SAVES 50% PER CARD</div>
-        </div>
-
-        <!-- Minimum order note -->
-        <div class="offer-guarantee" style="background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.3);">
-          <div class="og-icon">👥</div>
-          <div class="og-text">
-            <strong>Minimum 50 cards required</strong> to unlock the 50% group discount. Available to qualifying companies, agencies, and teams.
-          </div>
-        </div>
-
-        <!-- CTA Button -->
-        <a href="#" class="offer-btn offer-btn-teams" id="teamsApplyBtn" onclick="openTeamsModal(event)">
-          <span class="offer-btn-inner">
-            Apply to Qualify &mdash; Teams Pricing
-          </span>
-          <span class="offer-btn-sub">Limited slots &bull; We'll reach out within 24 hours</span>
-        </a>
-
       </div>
-    </div>
 
-    </div><!-- /offer-cards-row -->
+      <!-- CARD 3: AirConnect Teams -->
+      <div class="plan-card plan-card-teams rev d4">
+        <div class="plan-badge-strip plan-badge-teams">
+          <span class="plan-badge-text">FOR TEAMS &amp; BUSINESSES</span>
+        </div>
+        <div class="plan-card-body">
+
+          <div class="plan-name">AirConnect Teams</div>
+          <div class="plan-desc">Tailored cards with cohesive branding and management tools for your entire team.</div>
+
+          <div class="plan-price-wrap plan-price-quote">
+            <div class="plan-quote-label">Custom Pricing</div>
+            <div class="plan-quote-sub">Based on team size &amp; requirements</div>
+          </div>
+
+          <a href="#" class="plan-cta-btn plan-cta-teams" id="teamsApplyBtn" onclick="openTeamsModal(event)">
+            Get a Free Quote
+          </a>
+
+          <div class="plan-features">
+            <div class="pf-item"><span class="pf-icon">🎨</span><span>Custom Tailored Team Designs</span></div>
+            <div class="pf-item"><span class="pf-icon">⚡</span><span>Bulk Order Priority Fulfillment</span></div>
+            <div class="pf-item"><span class="pf-icon">🔗</span><span>Individual Profiles per Member</span></div>
+            <div class="pf-item"><span class="pf-icon">📦</span><span>Dedicated Account Manager</span></div>
+            <div class="pf-item"><span class="pf-icon">💳</span><span>Significant Bulk Discounts</span></div>
+          </div>
+
+          <div class="plan-divider"></div>
+
+          <div class="plan-includes-label">Everything in Pro, plus</div>
+          <div class="plan-includes">
+            <div class="pi-item"><span class="pi-check">✓</span> Company Logo on Card Design</div>
+            <div class="pi-item"><span class="pi-check">✓</span> Team Management Dashboard</div>
+            <div class="pi-item"><span class="pi-check">✓</span> White-Glove Setup for All Members</div>
+            <div class="pi-item"><span class="pi-check">✓</span> Priority Support Channel</div>
+            <div class="pi-item"><span class="pi-check">✓</span> Volume-Based Pricing Tiers</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /plan-cards-row -->
 
     <!-- Below card reassurances -->
     <div class="offer-notes rev d3">
       <div class="on-item"><div class="on-dot">✦</div> Free nationwide shipping</div>
-      <div class="on-item"><div class="on-dot">✦</div> One-time payment only</div>
-      <div class="on-item"><div class="on-dot">✦</div> No monthly fees. Ever.</div>
+      <div class="on-item"><div class="on-dot">✦</div> One-time payment for the card</div>
+      <div class="on-item"><div class="on-dot">✦</div> No hidden fees</div>
       <div class="on-item"><div class="on-dot">✦</div> Secure checkout</div>
     </div>
 
@@ -4050,19 +4238,31 @@ nav {
 </footer>
 
 <script>
-// Cursor
-const cur=document.getElementById("cur"),ring=document.getElementById("ring");
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;});
-(function loop(){cur.style.left=mx+"px";cur.style.top=my+"px";rx+=(mx-rx)*.1;ry+=(my-ry)*.1;ring.style.left=rx+"px";ring.style.top=ry+"px";requestAnimationFrame(loop);})();
-document.querySelectorAll("a,button").forEach(el=>{
-  el.addEventListener("mouseenter",()=>{cur.style.width="18px";cur.style.height="18px";ring.style.width="52px";ring.style.height="52px";});
-  el.addEventListener("mouseleave",()=>{cur.style.width="9px";cur.style.height="9px";ring.style.width="36px";ring.style.height="36px";});
-});
-
 // Scroll reveal
 const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("on");obs.unobserve(e.target);}});},{threshold:.1});
 document.querySelectorAll(".rev").forEach(el=>obs.observe(el));
+
+// Pricing billing toggle
+function updatePricingToggle() {
+  const yearly = document.getElementById('pricingToggle').checked;
+  const amount  = document.getElementById('pro-amount');
+  const period  = document.getElementById('pro-period');
+  const note    = document.getElementById('pro-note');
+  const mLabel  = document.getElementById('pt-monthly-label');
+  const yLabel  = document.getElementById('pt-yearly-label');
+  if (!amount) return;
+  if (yearly) {
+    amount.textContent = '1,250';
+    period.textContent = '/month';
+    note.textContent   = 'Billed ₱15,000 annually · Save ₱3,000/yr';
+    mLabel.classList.remove('active'); yLabel.classList.add('active');
+  } else {
+    amount.textContent = '1,500';
+    period.textContent = '/month';
+    note.textContent   = 'Cancel anytime · No contracts · No setup fees';
+    mLabel.classList.add('active'); yLabel.classList.remove('active');
+  }
+}
 
 // Hero card — interactive mouse-tilt
 const stage=document.querySelector(".card-stage");
