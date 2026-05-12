@@ -2536,6 +2536,7 @@ footer{background:var(--black);border-top:1px solid rgba(201,168,76,.1);padding:
   transition: all .3s ease;
 }
 .pro-daily-rate {
+  display: none; /* shown only on yearly toggle */
   margin-top: 10px;
   font-family: "Barlow Condensed", sans-serif;
   font-size: 12px;
@@ -2545,6 +2546,47 @@ footer{background:var(--black);border-top:1px solid rgba(201,168,76,.1);padding:
   color: var(--gold);
   opacity: .85;
 }
+
+/* Free Card banner — yearly exclusive */
+.pro-free-card-banner {
+  display: none; /* shown only on yearly toggle */
+  background: linear-gradient(135deg, rgba(201,168,76,.14) 0%, rgba(201,168,76,.06) 100%);
+  border: 1px solid rgba(201,168,76,.45);
+  border-left: 3px solid var(--gold);
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.pro-free-card-banner::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--gold) 0%, transparent 100%);
+}
+.pfcb-tag {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.pfcb-headline {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.pfcb-headline em { font-style: italic; color: var(--gold-lt); }
+.pfcb-sub {
+  font-size: 12px;
+  color: var(--white-d);
+  line-height: 1.55;
+}
+.pfcb-sub strong { color: var(--gold-lt); }
 
 /* Custom quote (Teams) price area */
 .plan-price-quote {
@@ -3949,8 +3991,15 @@ nav {
             <div class="pro-daily-rate">&#8369;41 a day &mdash; less than a Starbucks.</div>
           </div>
 
+          <!-- Free Card Banner — visible on Yearly toggle only -->
+          <div class="pro-free-card-banner" id="proFreeCardBanner">
+            <div class="pfcb-tag">🎁 Annual Plan Exclusive</div>
+            <div class="pfcb-headline">Get your AirConnect Card — <em>Free.</em></div>
+            <div class="pfcb-sub">Lock in Pro annually and we'll ship you a <strong>premium NFC card at zero cost.</strong> That's ₱3,000 of hardware — on us. Most closers recover the entire year's cost from a single deal in their first week.</div>
+          </div>
+
           <a href="upsell.html" class="plan-cta-btn plan-cta-pro">
-            Upgrade to Pro
+            Upgrade to Pro — Get Free Card
           </a>
 
           <div class="plan-features">
@@ -4255,23 +4304,32 @@ document.querySelectorAll(".rev").forEach(el=>obs.observe(el));
 
 // Pricing billing toggle
 function updatePricingToggle() {
-  const yearly = document.getElementById('pricingToggle').checked;
-  const amount  = document.getElementById('pro-amount');
-  const period  = document.getElementById('pro-period');
-  const note    = document.getElementById('pro-note');
-  const mLabel  = document.getElementById('pt-monthly-label');
-  const yLabel  = document.getElementById('pt-yearly-label');
+  const yearly    = document.getElementById('pricingToggle').checked;
+  const amount    = document.getElementById('pro-amount');
+  const period    = document.getElementById('pro-period');
+  const note      = document.getElementById('pro-note');
+  const mLabel    = document.getElementById('pt-monthly-label');
+  const yLabel    = document.getElementById('pt-yearly-label');
+  const dailyRate = document.querySelector('.pro-daily-rate');
+  const freeBanner= document.getElementById('proFreeCardBanner');
+  const ctaBtn    = document.querySelector('.plan-cta-pro');
   if (!amount) return;
   if (yearly) {
     amount.textContent = '1,250';
     period.textContent = '/month';
     note.textContent   = 'Billed ₱15,000 annually · Save ₱3,000/yr';
     mLabel.classList.remove('active'); yLabel.classList.add('active');
+    if (dailyRate)  dailyRate.style.display  = 'block';
+    if (freeBanner) freeBanner.style.display = 'block';
+    if (ctaBtn) ctaBtn.textContent = 'Upgrade to Pro — Get Free Card';
   } else {
     amount.textContent = '1,500';
     period.textContent = '/month';
     note.textContent   = 'Cancel anytime · No contracts · No setup fees';
     mLabel.classList.add('active'); yLabel.classList.remove('active');
+    if (dailyRate)  dailyRate.style.display  = 'none';
+    if (freeBanner) freeBanner.style.display = 'none';
+    if (ctaBtn) ctaBtn.textContent = 'Upgrade to Pro';
   }
 }
 
@@ -4490,53 +4548,103 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   const POPUP_DELAY = 4000;
   const STORAGE_KEY = 'ac_popup_seen';
 
-  function buildPopup() {
-    const overlay = document.createElement('div');
-    overlay.id = 'ac-popup-overlay';
-    overlay.innerHTML = `
-      <div id="ac-popup">
-        <button id="ac-popup-close" aria-label="Close">✕</button>
-        <div class="acp-badge">⚡ PRE-LAUNCH OFFER — ENDS APRIL 30</div>
-        <h2 class="acp-headline">Still thinking about it?<br><em>Here's what that costs you.</em></h2>
-        <p class="acp-sub">Every day without AirConnect is another lead who forgot your name, another deal that went to someone they remembered.</p>
+  // PH time helpers (local to popup IIFE)
+  function getPHNow() {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utcMs + 8 * 3600000);
+  }
+  function isMondayPH() { return getPHNow().getDay() === 1; }
 
-        <div class="acp-price-anchor">
-          <div class="acp-price-row">
-            <span class="acp-was">Regular Price</span>
-            <span class="acp-was-price">₱3,000</span>
-          </div>
-          <div class="acp-price-row highlight">
-            <span class="acp-now-label">YOU PAY TODAY</span>
-            <span class="acp-now-price">₱1,500</span>
-          </div>
-          <div class="acp-save-badge">YOU SAVE ₱1,500 — 50% OFF</div>
+  // Returns UTC ms timestamp of midnight tonight (PH time)
+  function getMidnightPHinUTC() {
+    const now    = new Date();
+    const ph     = getPHNow();
+    const eod    = new Date(ph); eod.setHours(23, 59, 59, 999);
+    return now.getTime() + (eod - ph); // UTC equivalent of end-of-day PH
+  }
+
+  // ── MONDAY popup: Flash Sale 50% off ──
+  const mondayHTML = `
+    <div id="ac-popup">
+      <button id="ac-popup-close" aria-label="Close">✕</button>
+      <div class="acp-badge">⚡ FLASH SALE — TODAY ONLY</div>
+      <h2 class="acp-headline">50% Off ends<br><em>at midnight tonight.</em></h2>
+      <p class="acp-sub">This price exists for exactly one day a week. The clock is running. When it hits zero, it's ₱3,000 — no exceptions, no extensions.</p>
+
+      <div class="acp-price-anchor">
+        <div class="acp-price-row">
+          <span class="acp-was">Regular Price</span>
+          <span class="acp-was-price">₱3,000</span>
         </div>
-
-        <div class="acp-urgency-row">
-          <div class="acp-urgency-item">
-            <span class="acp-urgency-icon">🔥</span>
-            <span class="acp-urgency-text">Sale ends in</span>
-            <div class="acp-cd">
-              <span id="popDays">--</span>d
-              <span id="popHours">--</span>h
-              <span id="popMins">--</span>m
-              <span id="popSecs">--</span>s
-            </div>
-          </div>
-          <div class="acp-urgency-item">
-            <span class="acp-urgency-icon">📦</span>
-            <span class="acp-urgency-text"><strong>Pre-launch pricing</strong> gone forever after April 30. Price doubles permanently.</span>
-          </div>
+        <div class="acp-price-row highlight">
+          <span class="acp-now-label">FLASH SALE PRICE</span>
+          <span class="acp-now-price">₱1,500</span>
         </div>
-
-        <a href="#pricing" id="ac-popup-cta" class="acp-cta-btn">
-          <span>LOCK IN MY 50% OFF NOW →</span>
-        </a>
-        <button id="ac-popup-decline" class="acp-decline-btn">
-          No thanks, I'll keep getting ghosted by leads<br>and pay double the price after the sale ends.
-        </button>
+        <div class="acp-save-badge">YOU SAVE ₱1,500 — 50% OFF TODAY ONLY</div>
       </div>
-    `;
+
+      <div class="acp-urgency-row">
+        <div class="acp-urgency-item">
+          <span class="acp-urgency-icon">🔥</span>
+          <span class="acp-urgency-text">Sale ends in &nbsp;<div class="acp-cd"><span id="popHours">--</span>h <span id="popMins">--</span>m <span id="popSecs">--</span>s</div></span>
+        </div>
+        <div class="acp-urgency-item">
+          <span class="acp-urgency-icon">📅</span>
+          <span class="acp-urgency-text">This sale only runs on Mondays. <strong>Next one is 7 days away.</strong></span>
+        </div>
+      </div>
+
+      <a href="#pricing" id="ac-popup-cta" class="acp-cta-btn">
+        <span>LOCK IN MY 50% OFF NOW →</span>
+      </a>
+      <button id="ac-popup-decline" class="acp-decline-btn">
+        No thanks, I'll come back and pay full price next time.
+      </button>
+    </div>
+  `;
+
+  // ── TUE–SUN popup: Urgency, scarcity, social proof ──
+  const regularHTML = `
+    <div id="ac-popup">
+      <button id="ac-popup-close" aria-label="Close">✕</button>
+      <div class="acp-badge">👥 TRUSTED BY CLOSERS ACROSS THE PHILIPPINES</div>
+      <h2 class="acp-headline">Someone just tapped<br><em>their AirConnect.</em></h2>
+      <p class="acp-sub">Right now, a professional in your industry just shared their contact with one tap — and it's already saved on that person's phone. Every day you wait is a lead that goes to someone who moved faster than you.</p>
+
+      <div class="acp-price-anchor">
+        <div class="acp-price-row highlight" style="border-top:none;margin-top:0;padding-top:4px;">
+          <span class="acp-now-label">ONE-TIME PRICE</span>
+          <span class="acp-now-price">₱3,000</span>
+        </div>
+        <div class="acp-save-badge" style="background:rgba(201,168,76,.12);color:var(--gold-lt);border:1px solid rgba(201,168,76,.3);">NO SUBSCRIPTIONS &nbsp;·&nbsp; NO MONTHLY FEES &nbsp;·&nbsp; EVER</div>
+      </div>
+
+      <div class="acp-urgency-row">
+        <div class="acp-urgency-item">
+          <span class="acp-urgency-icon">🏆</span>
+          <span class="acp-urgency-text">Real estate agents, insurance pros, and top sales closers across the Philippines are already using this to stay top-of-mind.</span>
+        </div>
+        <div class="acp-urgency-item">
+          <span class="acp-urgency-icon">⚡</span>
+          <span class="acp-urgency-text">Every week you delay is another week your contacts are <strong>buried in their phone, forgotten.</strong></span>
+        </div>
+      </div>
+
+      <a href="#pricing" id="ac-popup-cta" class="acp-cta-btn">
+        <span>GET MY AIRCONNECT NOW →</span>
+      </a>
+      <button id="ac-popup-decline" class="acp-decline-btn">
+        No thanks, I'll keep handing out paper cards<br>that end up in the trash.
+      </button>
+    </div>
+  `;
+
+  function buildPopup() {
+    const isMonday = isMondayPH();
+    const overlay  = document.createElement('div');
+    overlay.id     = 'ac-popup-overlay';
+    overlay.innerHTML = isMonday ? mondayHTML : regularHTML;
     document.body.appendChild(overlay);
 
     // Close handlers
@@ -4545,24 +4653,23 @@ document.querySelectorAll('.faq-q').forEach(btn => {
     document.getElementById('ac-popup-decline').addEventListener('click', closePopup);
     document.getElementById('ac-popup-cta').addEventListener('click', closePopup);
 
-    // Mini countdown inside popup
-    const deadline = new Date('2026-04-30T23:59:59+08:00').getTime();
-    const pad = n => String(Math.floor(n)).padStart(2,'0');
-    function tickPop() {
-      const diff = Math.max(0, deadline - Date.now());
-      const el = id => document.getElementById(id);
-      if (el('popDays')) el('popDays').textContent = pad(diff / 86400000);
-      if (el('popHours')) el('popHours').textContent = pad((diff % 86400000) / 3600000);
-      if (el('popMins')) el('popMins').textContent = pad((diff % 3600000) / 60000);
-      if (el('popSecs')) el('popSecs').textContent = pad((diff % 60000) / 1000);
-      if (diff > 0) setTimeout(tickPop, 1000);
+    // Monday: countdown to midnight PH time
+    if (isMonday) {
+      const deadline = getMidnightPHinUTC();
+      const pad = n => String(Math.floor(n)).padStart(2, '0');
+      function tickPop() {
+        const diff = Math.max(0, deadline - Date.now());
+        const el = id => document.getElementById(id);
+        if (el('popHours')) el('popHours').textContent = pad((diff % 86400000) / 3600000);
+        if (el('popMins'))  el('popMins').textContent  = pad((diff % 3600000)  / 60000);
+        if (el('popSecs'))  el('popSecs').textContent  = pad((diff % 60000)    / 1000);
+        if (diff > 0) setTimeout(tickPop, 1000);
+      }
+      tickPop();
     }
-    tickPop();
 
     // Animate in
-    requestAnimationFrame(() => {
-      overlay.classList.add('visible');
-    });
+    requestAnimationFrame(() => overlay.classList.add('visible'));
   }
 
   function closePopup() {
@@ -4577,9 +4684,7 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   // Show after delay if not already seen this session
   let alreadySeen = false;
   try { alreadySeen = !!sessionStorage.getItem(STORAGE_KEY); } catch(e) {}
-  if (!alreadySeen) {
-    setTimeout(buildPopup, POPUP_DELAY);
-  }
+  if (!alreadySeen) setTimeout(buildPopup, POPUP_DELAY);
 })();
 </script>
 
